@@ -78,6 +78,8 @@ def main():
 
     resp, content = client.request(user_url, 'GET')
     if resp['status'] != '200':
+        print "couldn't authenticate with username %s and password %s: %s" % (username, password, resp['status'],)
+        print content
         sys.exit(1)
 
     print "Credentials OK."
@@ -85,6 +87,8 @@ def main():
 
     resp, content = client.request(tracks_url, 'GET')
     if resp['status'] != '200':
+        print "couldn't get tracklist: %s" % (resp['status'],)
+        print content
         sys.exit(1)
 
     # assemble a dictionary whose keys are the MD5sums of already-uploaded tracks
