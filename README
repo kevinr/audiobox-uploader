@@ -1,0 +1,27 @@
+Unofficial Python AudioBox.fm Upload Script
+Copyright (C) 2010 Kevin Riggle <kevinr@free-dissociation.com>
+Released under the terms of the GNU GPL v2
+
+To install:
+* uncompress the source distribution or git clone the repository into your 
+  home directory (I like ~/src)
+* create a symlink from abup.py in the place you installed the distribution to
+  $HOME/bin, like so
+        ln -s $HOME/src/audiobox-uploader/abup.py $HOME/bin
+* $HOME/bin is in your $PATH, right?
+
+To use:
+* you can either specify your AudioBox username and password by editing the 
+  username and password variables in the abup.py script, or by supplying the 
+  -u option on the command line when you run the program
+* running `abup.py --help` will provide you with a list of other command line 
+  options and their uses
+* upload music!
+
+abup.py doesn't currently support bandwidth limiting, but if you need it (eg.
+so as to not annoy your housemates by saturating the house net connection's 
+uplink), it works great with the 'trickle' utility, available from an Apt 
+repository near you!
+
+Please feel free to contact me at kevinr@free-dissociation.com with any 
+questions, comments, or patches. :-)
