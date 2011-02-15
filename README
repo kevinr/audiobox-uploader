@@ -11,9 +11,9 @@ To install:
 * $HOME/bin is in your $PATH, right?
 
 To use:
-* you can either specify your AudioBox username and password by editing the 
-  username and password variables in the abup.py script, or by supplying the 
-  -u option on the command line when you run the program
+* if you don't use the -u option on the command line to specify your AudioBox
+  username and password, abup will prompt you for your credentials and give 
+  you the option to save them for future use
 * running `abup.py --help` will provide you with a list of other command line 
   options and their uses
 * upload music!

@@ -26,7 +26,7 @@
 # Boston, MA 02111-1307, USA.
 
 
-import urlparse, urllib, os, sys, re, httplib2, hashlib
+import urlparse, urllib, os, sys, re, httplib2, hashlib, getpass
 import oauth2 as oauth
 from optparse import OptionParser
 import multipart
@@ -38,15 +38,50 @@ musicfile = '\.mp3$'
 musicfile_re = re.compile(musicfile)
 
 
+conffile_name = '.abup.conf'
+
 request_token_url = "https://audiobox.fm/oauth/request_token"
 access_token_url = "https://audiobox.fm/oauth/access_token" 
 authorize_url = "https://audiobox.fm/oauth/authorize"
 user_url = "https://audiobox.fm/api/user"
 tracks_url = "https://audiobox.fm/api/tracks"
 
+always_prompt = False
+y_regex = re.compile('y|yes', flags=re.IGNORECASE)
+yn_regex = re.compile('y|yes|n|no', flags=re.IGNORECASE)
+
+def ask_yn(prompt, default=False):
+    p = ' '
+    while p != '' and not yn_regex.match(p):
+        p = raw_input(prompt)
+        if p != '' and not yn_regex.match(p):
+            print "Unrecognized input: %s" % (p,)
+    
+    if p == '':
+        return default
+    elif y_regex.match(p):
+        return True
+    return False
+
+
 def main():
     global username, password, musicfile, musicfile_re
+    global conffile_name
     global request_token_url, access_token_url, authorize_url, user_url, tracks_url
+    global always_prompt, y_regex, yn_regex
+
+    conffile = None
+    try:
+        conffile = open(os.path.join(os.environ['HOME'], conffile_name))
+        conf = conffile.read()
+        # an empty file means we should always prompt for the username and password
+        if re.search(':', conf):
+            username, password = conf.split(':')
+        else:
+            always_prompt = True
+    except IOError, e:
+        if e.errno != 2:    # file not found
+            raise e
 
     usage = "Usage: %prog [options] [FILES...] [DIRS...]"
     parser = OptionParser(usage=usage)
@@ -73,12 +108,28 @@ def main():
         sys.exit(1)
 
 
+    if username == '' or password == '':
+        username = raw_input('Username: ')
+        password = getpass.getpass()
+        if not conffile:
+            if not always_prompt:
+                save_p = ask_yn("Save username and password to ~/%s? [Yn] " % (conffile_name,), default=True)
+                if save_p:
+                    conffile = open(os.path.join(os.environ['HOME'], conffile_name), 'w')
+                    conffile.write("%s:%s" % (username, password))
+                    conffile.close()
+                else:
+                    always_prompt_p = ask_yn("Always prompt for username and password? [yN] ")
+                    if always_prompt_p:
+                        conffile = open(os.path.join(os.environ['HOME'], conffile_name), 'w')
+                        conffile.close()
+
     client = httplib2.Http()
     client.add_credentials(username, password)
 
     resp, content = client.request(user_url, 'GET')
     if resp['status'] != '200':
-        print "couldn't authenticate with username %s and password %s: %s" % (username, password, resp['status'],)
+        print "couldn't authenticate user '%s' with the specified password: %s" % (username, resp['status'],)
         print content
         sys.exit(1)
 
