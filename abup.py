@@ -35,7 +35,7 @@ username = ''
 password = ''
 
 musicfile = '\.mp3$'
-musicfile_re = re.compile(musicfile)
+musicfile_re = re.compile(musicfile, flags=re.IGNORECASE)
 
 
 conffile_name = '.abup.conf'
@@ -87,7 +87,7 @@ def main():
     parser = OptionParser(usage=usage)
     parser.add_option('-u', '--user', dest='user', help='your AudioBox.fm username and password', metavar='USER:PASS')
     parser.add_option('-f', '--force', dest='force_upload', action='store_true', help='force upload even if these files have been uploaded before', default=False)
-    parser.add_option('-r', '--music-regex', dest='music_regex', metavar='REGEX', help="regex to use to identify appropriate music files to upload (default: '%s')" % (musicfile,))
+    parser.add_option('-r', '--music-regex', dest='music_regex', metavar='REGEX', help="regex (case-insensitive) to use to identify appropriate music files to upload (default: '%s')" % (musicfile,))
 
     if len(sys.argv[1:]) == 0:
         parser.print_help()
