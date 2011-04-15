@@ -26,8 +26,7 @@
 # Boston, MA 02111-1307, USA.
 
 
-import urlparse, urllib, os, sys, re, httplib2, hashlib, getpass
-import oauth2 as oauth
+import os, sys, re, httplib2, hashlib, getpass
 from optparse import OptionParser
 import multipart
 
@@ -40,9 +39,6 @@ musicfile_re = re.compile(musicfile, flags=re.IGNORECASE)
 
 conffile_name = '.abup.conf'
 
-request_token_url = "https://audiobox.fm/oauth/request_token"
-access_token_url = "https://audiobox.fm/oauth/access_token" 
-authorize_url = "https://audiobox.fm/oauth/authorize"
 user_url = "https://audiobox.fm/api/user"
 tracks_url = "https://audiobox.fm/api/tracks"
 
@@ -67,7 +63,7 @@ def ask_yn(prompt, default=False):
 def main():
     global username, password, musicfile, musicfile_re
     global conffile_name
-    global request_token_url, access_token_url, authorize_url, user_url, tracks_url
+    global user_url, tracks_url
     global always_prompt, y_regex, yn_regex
 
     conffile = None
