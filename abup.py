@@ -83,6 +83,7 @@ def main():
     parser = OptionParser(usage=usage)
     parser.add_option('-u', '--user', dest='user', help='your AudioBox.fm username and password', metavar='USER:PASS')
     parser.add_option('-f', '--force', dest='force_upload', action='store_true', help='force upload even if these files have been uploaded before', default=False)
+    parser.add_option('-n', '--dry-run', dest='dry_run', action='store_true', help="don't take any action, only print what would be done", default=False)
     parser.add_option('-r', '--music-regex', dest='music_regex', metavar='REGEX', help="regex (case-insensitive) to use to identify appropriate music files to upload (default: '%s')" % (musicfile,))
 
     if len(sys.argv[1:]) == 0:
@@ -98,6 +99,7 @@ def main():
         musicfile_re = re.compile(musicfile)
 
     force_upload = options.force_upload
+    dry_run = options.dry_run
 
     if len(args) == 0:
         print "No files or directories specified."
@@ -166,12 +168,12 @@ def main():
         for root, dirs, files in os.walk(arg_dir, topdown=True, followlinks=True):
             for filename in files:
                 path = os.path.join(root, filename)
-                upload_file(client, path, tracks, force_upload)
+                upload_file(client, path, tracks, force_upload, dry_run)
 
     sys.exit(0)
 
 
-def upload_file(client, path, tracks, force):
+def upload_file(client, path, tracks, force, dry_run):
     global tracks_url
     if musicfile_re.search(str(path)):
         f = open(path, 'rb')
@@ -181,14 +183,15 @@ def upload_file(client, path, tracks, force):
         # audiobox currently chokes on paths with literal double-quotes, so this is a hack to avoid that
         if not '"' in path and (force or not fhash in tracks):
             print "uploading " + str(path)
-            f.seek(0)    # return cursor to beginning of file
-            data = {'file': f}  # for some reason this needs the original file object, so we read it twice, yay
-            body = multipart.encode_multipart(multipart.BOUNDARY, data)
-            headers = {'content-type': "multipart/form-data; boundary=%s" % multipart.BOUNDARY, 
-                'content-length': "%d" % len(body)}
-            resp, content = client.request(tracks_url, 'POST', body=body, headers=headers)
-            print resp
-            print content
+            if not dry_run:
+                f.seek(0)    # return cursor to beginning of file
+                data = {'file': f}  # for some reason this needs the original file object, so we read it twice, yay
+                body = multipart.encode_multipart(multipart.BOUNDARY, data)
+                headers = {'content-type': "multipart/form-data; boundary=%s" % multipart.BOUNDARY, 
+                    'content-length': "%d" % len(body)}
+                resp, content = client.request(tracks_url, 'POST', body=body, headers=headers)
+                print resp
+                print content
         #else:
             #print "already uploaded, skipping"
 
